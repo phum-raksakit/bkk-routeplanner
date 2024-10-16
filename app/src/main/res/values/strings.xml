@@ -1,3 +1,20 @@
 <resources>
     <string name="app_name">BKK Route Planner</string>
+    <string name="ItineraryPlan">Itinerary Plan</string>
+    <string name="NoPlan">There are no plans yet.</string>
+    <string name="NoPlanExplain">You can press the plus button\nto create a plan</string>
+    <string name="CreatePlan">Create Plan</string>
+    <string name="PlanName">Plan Name</string>
+    <string name="Name">Name</string>
+    <string name="StartLocation">Starting Location</string>
+    <string name="YourStartLocation">Your starting location</string>
+    <string name="TouristLocations">Tourist Locations</string>
+    <string name="Locations">Locations</string>
+    <string name="Date">Date</string>
+    <string name="Time">Time</string>
+    <string name="Create">Create</string>
+    <string name="Add">Add</string>
+    <string name="ItineraryDetails">Itinerary Details</string>
+    <string name="ItineraryOrder">Itinerary Order</string>
+    <string name="addNewPlan">Add new plan</string>
 </resources>

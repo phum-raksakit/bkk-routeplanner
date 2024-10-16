@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.bkkrouteplanner"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -47,6 +47,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+    implementation ("com.google.android.material:material:1.6.0")
     implementation("com.google.android.gms:play-services-maps:19.0.0")
     implementation("com.google.android.libraries.places:places:3.2.0")
     testImplementation(libs.junit)
