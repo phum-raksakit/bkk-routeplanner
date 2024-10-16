@@ -18,10 +18,13 @@
         android:theme="@style/Theme.BKKRoutePlanner"
         tools:targetApi="31">
         <activity
+            android:name=".HomepageActivity"
+            android:exported="false" />
+        <activity
             android:name=".SearchActivity"
             android:exported="false" />
         <activity
-            android:name=".HomepageActivity"
+            android:name=".CreatePlanActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
