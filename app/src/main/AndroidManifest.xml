@@ -17,6 +17,9 @@
         android:theme="@style/AppTheme"
         tools:targetApi="31">
         <activity
+            android:name=".PlanDetailsActivity"
+            android:exported="true" />
+        <activity
             android:name=".CreatePlanActivity"
             android:exported="true" />
         <activity
@@ -27,6 +30,7 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

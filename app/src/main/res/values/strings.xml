@@ -18,6 +18,8 @@
     <string name="YourPlanName">Your plan name</string>
     <string name="YourStartLocation">Click Here To Select Start Place</string>
     <string name="Locations">Click Here To Select Destination Place</string>
+    <string name="Dates">Click Here To Select Date</string>
+    <string name="Times">Click Here To Select Time</string>
 
     <!-- Button -->
     <string name="Create">Create</string>

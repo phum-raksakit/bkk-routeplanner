@@ -31,6 +31,8 @@ class CreatePlanActivity : AppCompatActivity() {
         // Set up back button to navigate to HomepageActivity
         setupBackButton()
 
+        setupCreateButton()
+
         // Initialize Google Places API
         Places.initialize(applicationContext, BuildConfig.MAPS_API_KEY)
 
@@ -50,6 +52,14 @@ class CreatePlanActivity : AppCompatActivity() {
         val backButton = findViewById<ImageButton>(R.id.backButton)
         backButton.setOnClickListener {
             val intent = Intent(this, HomepageActivity::class.java)
+            startActivity(intent)
+        }
+    }
+
+    private fun setupCreateButton() {
+        val createButton = findViewById<Button>(R.id.create_button)
+        createButton.setOnClickListener {
+            val intent = Intent(this, PlanDetailsActivity::class.java)
             startActivity(intent)
         }
     }
