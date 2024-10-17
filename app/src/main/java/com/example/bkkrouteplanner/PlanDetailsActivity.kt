@@ -19,7 +19,7 @@ class PlanDetailsActivity : AppCompatActivity() {
             insets
         }
 
-        val recyclerView: RecyclerView = findViewById(R.id.recyclerViewReview)
+        val recyclerView: RecyclerView = findViewById(R.id.recyclerViewPlace)
         recyclerView.layoutManager = LinearLayoutManager(this)
         val items = listOf(
             TimelineItem("SEA LIFE Bangkok", "Floor B1 Siam Paragon"),

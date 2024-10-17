@@ -12,6 +12,7 @@ class TimelinePlanAdapter(private val items: List<TimelineItem>) : RecyclerView.
     inner class TimelineViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val placeName: TextView = view.findViewById(R.id.placeName)
         val address: TextView = view.findViewById(R.id.address)
+        val line: View = view.findViewById(R.id.line)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TimelineViewHolder {
@@ -23,6 +24,13 @@ class TimelinePlanAdapter(private val items: List<TimelineItem>) : RecyclerView.
         val item = items[position]
         holder.placeName.text = item.placeName
         holder.address.text = item.address
+
+        // hide line if it's last item
+        if (position == items.size - 1) {
+            holder.line.visibility = View.INVISIBLE
+        } else {
+            holder.line.visibility = View.VISIBLE
+        }
     }
 
     override fun getItemCount(): Int = items.size

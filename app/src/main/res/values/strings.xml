@@ -34,7 +34,7 @@
 
     <!-- Text -->
     <string name="NoPlan">There are no plans yet.</string>
-    <string name="NoPlanExplain">You can press the plus button\nto create a plan</string>
+    <string name="NoPlanExplain">You can press the plus button to\ncreate a plan</string>
     <string name="title_activity_maps">MapsActivity</string>
     <string name="title_activity_maps2">MapsActivity2</string>
 
