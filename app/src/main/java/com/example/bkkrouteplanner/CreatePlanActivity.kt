@@ -1,5 +1,6 @@
 package com.example.bkkrouteplanner
 
+import android.Manifest
 import android.content.Intent
 import android.os.Bundle
 import android.widget.ArrayAdapter
@@ -13,8 +14,17 @@ import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
 import android.content.Context
+import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 
 class CreatePlanActivity : AppCompatActivity() {
 
@@ -32,6 +42,7 @@ class CreatePlanActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_create_plan)
+
 
         setupBackButton()       // Set up the back button for navigation
         setupStartButton()      // Set up EditText button to launch MapsActivity
@@ -56,6 +67,16 @@ class CreatePlanActivity : AppCompatActivity() {
             }
         }
     }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == 1 && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            showNotification("New Plan Created", "Your travel plan has been saved successfully!")
+        } else {
+            Toast.makeText(this, "Notification permission denied", Toast.LENGTH_SHORT).show()
+        }
+    }
+
 
     // Handle the result returned from MapsActivity
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -162,18 +183,46 @@ class CreatePlanActivity : AppCompatActivity() {
         val planNameEditText = findViewById<EditText>(R.id.editTextPlanName)
         val dateEditText = findViewById<EditText>(R.id.editTextDate)
         val timeEditText = findViewById<EditText>(R.id.editTextTime)
+        val start = findViewById<EditText>(R.id.editTextStartLocation)
+        val destination = findViewById<EditText>(R.id.editTextDestLocation)
 
         createButton.setOnClickListener {
-            val planName = planNameEditText.text.toString()
-            val date = dateEditText.text.toString()
-            val time = timeEditText.text.toString()
+            val planName = planNameEditText.text.toString().trim()
+            val date = dateEditText.text.toString().trim()
+            val time = timeEditText.text.toString().trim()
+
+            // ตรวจสอบว่า EditText ทั้งหมดต้องไม่ว่าง
+            if (planName.isEmpty()) {
+                planNameEditText.error = "Please enter the plan name"
+                return@setOnClickListener
+            }
+            if (date.isEmpty()) {
+                dateEditText.error = "Please select a date"
+                return@setOnClickListener
+            }
+            if (time.isEmpty()) {
+                timeEditText.error = "Please select a time"
+                return@setOnClickListener
+            }
+
+            // ตรวจสอบว่า startPlace ไม่เป็น null และไม่ว่าง
+            if (startPlace.isNullOrEmpty()) {
+                start.error = "Please select a Location"
+                return@setOnClickListener
+            }
+
+            // ตรวจสอบว่า destinationList ไม่ว่างหรือเปล่า
+            if (destinationList.isNullOrEmpty()) {
+                destination.error = "Please add at least one destination"
+                return@setOnClickListener
+            }
 
             val planId = "Plan_${System.currentTimeMillis()}"
 
             val newPlan = Plan(
                 id = planId,
                 planName = planName,
-                start = this.startPlace ?: "",
+                start = startPlace!!,  // startPlace ไม่เป็น null เพราะเราได้ตรวจสอบแล้ว
                 destination = destinationList,
                 date = date,
                 time = time
@@ -183,13 +232,25 @@ class CreatePlanActivity : AppCompatActivity() {
             savePlanToLocalStorage(newPlan)
 
             Toast.makeText(this, "New Plan Created: ${newPlan.planName}", Toast.LENGTH_SHORT).show()
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1)
+                } else {
+                    showNotification("New Plan Created", "Your travel plan has been saved successfully! ${planId}")
+                }
+            } else {
+                showNotification("New Plan Created", "Your travel plan has been saved successfully!")
+            }
         }
     }
+
 
     private fun savePlanToLocalStorage(plan: Plan) {
         val sharedPreferences = getSharedPreferences("myPlanStorage", Context.MODE_PRIVATE)
         val editor = sharedPreferences.edit()
         val gson = Gson()
+
 
         // แปลง Plan เป็น JSON
         val planJson = gson.toJson(plan)
@@ -206,4 +267,40 @@ class CreatePlanActivity : AppCompatActivity() {
         editor.putString("planList", gson.toJson(planList))
         editor.apply()
     }
+
+    private fun showNotification(title: String, text: String) {
+        val channelId = "plan_channel_id"
+
+        // ตรวจสอบและสร้าง Notification Channel สำหรับ Android 8.0 ขึ้นไป
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channelName = "Plan Notifications"
+            val channelDescription = "Notifications for new plans"
+            val importance = NotificationManager.IMPORTANCE_DEFAULT
+            val channel = NotificationChannel(channelId, channelName, importance).apply {
+                description = channelDescription
+            }
+            val notificationManager: NotificationManager =
+                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
+
+        // สร้าง Notification
+        val notification = NotificationCompat.Builder(this, channelId)
+            .setContentTitle(title)
+            .setSmallIcon(R.drawable.ic_map)
+            .setContentText(text)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .build()
+
+        // ตรวจสอบ permission ก่อนแสดง Notification
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
+            val manager = NotificationManagerCompat.from(this)
+            manager.notify(0, notification)
+        } else {
+            // ขอสิทธิ์ POST_NOTIFICATIONS หากยังไม่ได้รับ
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1)
+        }
+    }
+
+
 }
