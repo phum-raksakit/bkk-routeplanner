@@ -24,7 +24,8 @@
 
         <!-- เส้นแนวตั้ง -->
         <View
-            android:layout_width="2dp"
+            android:id="@+id/line"
+            android:layout_width="3dp"
             android:layout_height="match_parent"
             android:layout_marginTop="4dp"
             android:background="@color/darkBlue"/>

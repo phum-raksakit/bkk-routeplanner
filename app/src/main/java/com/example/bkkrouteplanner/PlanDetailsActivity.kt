@@ -43,7 +43,7 @@ class PlanDetailsActivity : AppCompatActivity() {
             findViewById<TextView>(R.id.textViewTime).text = plan.time
 
             // ตั้งค่า RecyclerView สำหรับ destination
-            val recyclerView: RecyclerView = findViewById(R.id.recyclerViewReview)
+            val recyclerView: RecyclerView = findViewById(R.id.recyclerViewPlace)
             recyclerView.layoutManager = LinearLayoutManager(this)
 
             // สร้างรายการ TimelineItem จาก destination

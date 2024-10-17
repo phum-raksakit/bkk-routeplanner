@@ -104,6 +104,8 @@
             android:textColorHint="@color/GreenConfirmAlpha0_7"
             android:background="@drawable/selector_edit_text_big_bg"
             android:singleLine="true"
+            android:drawableStart="@drawable/ic_map"
+            android:drawablePadding="15dp"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:hint="@string/YourStartLocation"
@@ -129,12 +131,15 @@
             android:textColorHint="@color/GreenConfirmAlpha0_7"
             android:background="@drawable/selector_edit_text_big_bg"
             android:singleLine="true"
+            android:drawableStart="@drawable/ic_search"
+            android:drawablePadding="15dp"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:hint="@string/Locations"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tourist_location" />
+            app:layout_constraintTop_toBottomOf="@id/tourist_location"
+            />
 
         <Button
             android:id="@+id/add_button"
@@ -150,8 +155,8 @@
             android:layout_marginTop="10dp"
             android:text="@string/Add"
             app:layout_constraintEnd_toEndOf="parent"
-            app:backgroundTint="@color/darkBlue"
-            app:layout_constraintTop_toBottomOf="@id/editTextDestLocation" />
+            app:layout_constraintTop_toBottomOf="@id/editTextDestLocation"
+            app:backgroundTint="@color/darkBlue"/>
 
         <TextView
             android:id="@+id/destination_list"
@@ -188,8 +193,13 @@
 
         <EditText
             android:id="@+id/editTextDate"
+            style="@style/Text.Label"
+            android:textColorHint="@color/GreenConfirmAlpha0_7"
+            android:singleLine="true"
             android:textColor="@color/darkBlue"
             android:background="@drawable/selector_edit_text_big_bg"
+            android:drawableStart="@drawable/ic_calender"
+            android:drawablePadding="15dp"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginBottom="5dp"
@@ -209,8 +219,13 @@
 
         <EditText
             android:id="@+id/editTextTime"
+            style="@style/Text.Label"
+            android:textColorHint="@color/GreenConfirmAlpha0_7"
+            android:singleLine="true"
             android:textColor="@color/darkBlue"
             android:background="@drawable/selector_edit_text_big_bg"
+            android:drawableStart="@drawable/ic_clock"
+            android:drawablePadding="15dp"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginBottom="20dp"
