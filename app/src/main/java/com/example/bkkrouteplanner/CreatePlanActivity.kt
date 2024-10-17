@@ -28,30 +28,54 @@ class CreatePlanActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_create_plan)
 
-        // Initialize Places API
+        // Set up back button to navigate to HomepageActivity
+        setupBackButton()
+
+        // Initialize Google Places API
         Places.initialize(applicationContext, BuildConfig.MAPS_API_KEY)
 
-        // TimePicker in 24-hour format
+        // Set up autocomplete fields for start and destination locations
+        setupLocationAutocomplete()
 
-        // EditText for Start Location with Autocomplete
+        // Set up destination list and add button functionality
+        setupDestinationList()
+
+        // Set up date and time pickers
+        setupDatePicker()
+        setupTimePicker()
+    }
+
+    // Setup Back button functionality
+    private fun setupBackButton() {
+        val backButton = findViewById<ImageButton>(R.id.backButton)
+        backButton.setOnClickListener {
+            val intent = Intent(this, HomepageActivity::class.java)
+            startActivity(intent)
+        }
+    }
+
+    // Set up EditText for start and destination locations with Google Places Autocomplete
+    private fun setupLocationAutocomplete() {
         val startLocationEditText = findViewById<EditText>(R.id.editTextStartLocation)
+        val destinationLocationEditText = findViewById<EditText>(R.id.editTextDestLocation)
+
         startLocationEditText.setOnClickListener {
             startAutocompleteActivity(AUTOCOMPLETE_REQUEST_CODE_START)
         }
-
-        // EditText for Destination Location with Autocomplete
-        val destinationLocationEditText = findViewById<EditText>(R.id.editTextDestLocation)
         destinationLocationEditText.setOnClickListener {
             startAutocompleteActivity(AUTOCOMPLETE_REQUEST_CODE_DESTINATION)
         }
+    }
 
-        // ListView and Adapter for Destination List
+    // Set up destination list and add button for adding locations
+    private fun setupDestinationList() {
         val destinationListView = findViewById<ListView>(R.id.destination_listView)
+        val destinationLocationEditText = findViewById<EditText>(R.id.editTextDestLocation)
+        val addButton = findViewById<Button>(R.id.add_button)
+
         adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, destinationList)
         destinationListView.adapter = adapter
 
-        // Add Button for Destination List
-        val addButton = findViewById<Button>(R.id.add_button)
         addButton.setOnClickListener {
             val destinationText = destinationLocationEditText.text.toString()
             if (destinationText.isNotBlank()) {
@@ -63,8 +87,10 @@ class CreatePlanActivity : AppCompatActivity() {
                 Toast.makeText(this, "Please select a destination location first.", Toast.LENGTH_SHORT).show()
             }
         }
+    }
 
-        // Material DatePicker for Date Selection
+    // Set up Date Picker for selecting a date
+    private fun setupDatePicker() {
         val dateEditText = findViewById<EditText>(R.id.editTextDate)
         val datePicker = MaterialDatePicker.Builder.datePicker()
             .setTitleText("Select a Date")
@@ -76,12 +102,13 @@ class CreatePlanActivity : AppCompatActivity() {
 
         datePicker.addOnPositiveButtonClickListener { selection ->
             dateEditText.setText(datePicker.headerText)
-            Toast.makeText(this, "Selected Date: ${datePicker.headerText}", Toast.LENGTH_SHORT).show()
         }
+    }
 
-        // Material TimePicker for Time Selection
+    // Set up Time Picker for selecting time
+    private fun setupTimePicker() {
         val timeEditText = findViewById<EditText>(R.id.editTextTime)
-        val timePickerMaterial = MaterialTimePicker.Builder()
+        val timePicker = MaterialTimePicker.Builder()
             .setTimeFormat(TimeFormat.CLOCK_24H)
             .setHour(12)
             .setMinute(0)
@@ -89,17 +116,17 @@ class CreatePlanActivity : AppCompatActivity() {
             .build()
 
         timeEditText.setOnClickListener {
-            timePickerMaterial.show(supportFragmentManager, "MATERIAL_TIME_PICKER")
+            timePicker.show(supportFragmentManager, "MATERIAL_TIME_PICKER")
         }
 
-        timePickerMaterial.addOnPositiveButtonClickListener {
-            val selectedHour = timePickerMaterial.hour
-            val selectedMinute = timePickerMaterial.minute
+        timePicker.addOnPositiveButtonClickListener {
+            val selectedHour = timePicker.hour
+            val selectedMinute = timePicker.minute
             timeEditText.setText(String.format("%02d:%02d", selectedHour, selectedMinute))
-            Toast.makeText(this, "Selected Time: $selectedHour:$selectedMinute", Toast.LENGTH_SHORT).show()
         }
     }
 
+    // Launch Google Places Autocomplete activity with specified request code
     private fun startAutocompleteActivity(requestCode: Int) {
         val fields = listOf(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG)
         val intent = Autocomplete.IntentBuilder(AutocompleteActivityMode.FULLSCREEN, fields)
@@ -107,25 +134,18 @@ class CreatePlanActivity : AppCompatActivity() {
         startActivityForResult(intent, requestCode)
     }
 
+    // Handle results from Autocomplete activity
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
         if (resultCode == Activity.RESULT_OK && data != null) {
             val place = Autocomplete.getPlaceFromIntent(data)
-            val placeName = place.name
-            val locationEditText: EditText?
-
-            when (requestCode) {
-                AUTOCOMPLETE_REQUEST_CODE_START -> {
-                    locationEditText = findViewById(R.id.editTextStartLocation)
-                }
-                AUTOCOMPLETE_REQUEST_CODE_DESTINATION -> {
-                    locationEditText = findViewById(R.id.editTextDestLocation)
-                }
-                else -> return
+            val locationEditText: EditText? = when (requestCode) {
+                AUTOCOMPLETE_REQUEST_CODE_START -> findViewById(R.id.editTextStartLocation)
+                AUTOCOMPLETE_REQUEST_CODE_DESTINATION -> findViewById(R.id.editTextDestLocation)
+                else -> null
             }
-
-            locationEditText?.setText(placeName)
+            locationEditText?.setText(place.name)
         } else if (resultCode == AutocompleteActivity.RESULT_ERROR && data != null) {
             val status = Autocomplete.getStatusFromIntent(data)
             Toast.makeText(this, "Error: ${status.statusMessage}", Toast.LENGTH_SHORT).show()
