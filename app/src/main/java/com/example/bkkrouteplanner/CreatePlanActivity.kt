@@ -34,13 +34,13 @@ class CreatePlanActivity : AppCompatActivity() {
         // TimePicker in 24-hour format
 
         // EditText for Start Location with Autocomplete
-        val startLocationEditText = findViewById<EditText>(R.id.StartLocation)
+        val startLocationEditText = findViewById<EditText>(R.id.editTextStartLocation)
         startLocationEditText.setOnClickListener {
             startAutocompleteActivity(AUTOCOMPLETE_REQUEST_CODE_START)
         }
 
         // EditText for Destination Location with Autocomplete
-        val destinationLocationEditText = findViewById<EditText>(R.id.DestLocation)
+        val destinationLocationEditText = findViewById<EditText>(R.id.editTextDestLocation)
         destinationLocationEditText.setOnClickListener {
             startAutocompleteActivity(AUTOCOMPLETE_REQUEST_CODE_DESTINATION)
         }
@@ -65,7 +65,7 @@ class CreatePlanActivity : AppCompatActivity() {
         }
 
         // Material DatePicker for Date Selection
-        val dateEditText = findViewById<EditText>(R.id.date)
+        val dateEditText = findViewById<EditText>(R.id.editTextDate)
         val datePicker = MaterialDatePicker.Builder.datePicker()
             .setTitleText("Select a Date")
             .build()
@@ -80,7 +80,7 @@ class CreatePlanActivity : AppCompatActivity() {
         }
 
         // Material TimePicker for Time Selection
-        val timeEditText = findViewById<EditText>(R.id.time)
+        val timeEditText = findViewById<EditText>(R.id.editTextTime)
         val timePickerMaterial = MaterialTimePicker.Builder()
             .setTimeFormat(TimeFormat.CLOCK_24H)
             .setHour(12)
@@ -117,10 +117,10 @@ class CreatePlanActivity : AppCompatActivity() {
 
             when (requestCode) {
                 AUTOCOMPLETE_REQUEST_CODE_START -> {
-                    locationEditText = findViewById(R.id.StartLocation)
+                    locationEditText = findViewById(R.id.editTextStartLocation)
                 }
                 AUTOCOMPLETE_REQUEST_CODE_DESTINATION -> {
-                    locationEditText = findViewById(R.id.DestLocation)
+                    locationEditText = findViewById(R.id.editTextDestLocation)
                 }
                 else -> return
             }

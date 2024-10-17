@@ -7,6 +7,7 @@
     android:layout_height="match_parent"
     tools:context=".HomepageActivity">
 
+    <!-- Iitle Bar -->
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
@@ -35,9 +36,10 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
+    <!-- Add New Plan Button -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/buttonAddNewPlan"
-        android:contentDescription="@string/addNewPlan"
+        android:contentDescription="@string/addNewPlanButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
