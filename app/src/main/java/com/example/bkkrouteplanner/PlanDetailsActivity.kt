@@ -1,8 +1,10 @@
 package com.example.bkkrouteplanner
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.widget.ImageButton
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -16,44 +18,50 @@ class PlanDetailsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_plan_details)
 
-        // ดึงแผนตาม ID ที่ต้องการ
-        val planId = "Plan_1729199517171" // ตัวอย่าง ID
+        // Get the plan ID from the Intent extras
+        val planId = intent.getStringExtra("PLAN_ID")
         if (planId != null) {
-            displayPlanDetails(planId)
+            displayPlanDetails(planId) // Display plan details for the provided ID
         } else {
-            Log.d("SaveCheck", "Plan ID not provided.")
+            Log.d("SaveCheck", "Plan ID not provided.") // Log if no plan ID is provided
+        }
+
+        // Set up the back button to navigate back to HomepageActivity
+        val backButton = findViewById<ImageButton>(R.id.backButton)
+        backButton.setOnClickListener {
+            val intent = Intent(this, HomepageActivity::class.java)
+            startActivity(intent)
         }
     }
 
+    // Function to display plan details based on the given plan ID
     private fun displayPlanDetails(planId: String) {
-        val sharedPreferences = getSharedPreferences("myPlanStorage", Context.MODE_PRIVATE)
+        val sharedPreferences = getSharedPreferences("PlanStorage", Context.MODE_PRIVATE)
         val gson = Gson()
-        val json = sharedPreferences.getString("planList", "[]")
+        val json = sharedPreferences.getString("planList", "[]") // Get saved plan list from SharedPreferences
         val type = object : TypeToken<List<Plan>>() {}.type
         val planList: List<Plan> = gson.fromJson(json, type) ?: emptyList()
 
+        // Find the specific plan using the plan ID
         val plan = planList.find { it.id == planId }
 
         if (plan != null) {
+            // Set the TextViews with data from the plan
+            findViewById<TextView>(R.id.textViewPlanName).text = plan.planName // Set plan name
+            findViewById<TextView>(R.id.textViewMap).text = plan.start         // Set starting point
+            findViewById<TextView>(R.id.textViewDate).text = plan.date         // Set date
+            findViewById<TextView>(R.id.textViewTime).text = plan.time         // Set time
 
-            // ตั้งค่า TextView จากข้อมูลที่โหลดมา
-            findViewById<TextView>(R.id.textViewPlanName).text = plan.planName
-            findViewById<TextView>(R.id.textViewMap).text = plan.start
-            findViewById<TextView>(R.id.textViewDate).text = plan.date
-            findViewById<TextView>(R.id.textViewTime).text = plan.time
-
-            // ตั้งค่า RecyclerView สำหรับ destination
+            // Set up RecyclerView for displaying the destinations
             val recyclerView: RecyclerView = findViewById(R.id.recyclerViewPlace)
-            recyclerView.layoutManager = LinearLayoutManager(this)
+            recyclerView.layoutManager = LinearLayoutManager(this)             // Set layout manager
 
-            // สร้างรายการ TimelineItem จาก destination
-            val items = plan.destination.map { TimelineItem(it, "") } // map เพื่อแปลงเป็น TimelineItem
+            // Convert destinations to TimelineItem list and set up the adapter
+            val items = plan.destination.map { TimelineItem(it, "") }          // Convert destinations to TimelineItem
             val adapter = TimelinePlanAdapter(items)
-            recyclerView.adapter = adapter
+            recyclerView.adapter = adapter                                     // Set adapter to RecyclerView
         } else {
-            Log.d("SaveCheck", "Plan with ID $planId not found.")
+            Log.d("SaveCheck", "Plan with ID $planId not found.")              // Log if plan is not found
         }
     }
 }
-
-

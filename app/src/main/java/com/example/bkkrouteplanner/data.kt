@@ -26,6 +26,15 @@ data class Plan(
     val time:String
 )
 
+data class PlanItem(
+    val planId: String,
+    val planName: String,
+    val dateOfPlan: String,
+    val numOfPlaces: String,
+    val place1: String,
+    val place2: String
+)
+
 data class LatLng(
     val latitude: Double,
     val longitude: Double

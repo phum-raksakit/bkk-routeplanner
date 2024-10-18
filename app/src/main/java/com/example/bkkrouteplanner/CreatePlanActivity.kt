@@ -14,13 +14,12 @@ import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
 import android.content.Context
-import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.app.ActivityCompat
@@ -30,7 +29,7 @@ class CreatePlanActivity : AppCompatActivity() {
 
     companion object {
         private const val MAPS_ACTIVITY_REQUEST_CODE_START = 1 // Request code for MapsActivity
-        private const val MAPS_ACTIVITY_REQUEST_CODE_DEST = 2
+        private const val MAPS_ACTIVITY_REQUEST_CODE_DEST = 2 // Request code for destination selection
     }
 
     private var startPlace: String? = null // Variable to store the start place name
@@ -38,25 +37,23 @@ class CreatePlanActivity : AppCompatActivity() {
     private lateinit var destinationAdapter: ArrayAdapter<String>
     private val destinationList: MutableList<String> = mutableListOf() // List to hold all destinations
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_create_plan)
 
-
-        setupBackButton()       // Set up the back button for navigation
-        setupStartButton()      // Set up EditText button to launch MapsActivity
-        setupDestinationButton()// Set up EditText button to launch MapsActivity
-        setupDatePicker()       // Set up date picker dialog
-        setupTimePicker()       // Set up time picker dialog
-        setupCreateButton()
+        setupBackButton()          // Initialize back button
+        setupStartButton()         // Initialize start place button
+        setupDestinationButton()   // Initialize destination button
+        setupDatePicker()          // Initialize date picker dialog
+        setupTimePicker()          // Initialize time picker dialog
+        setupCreateButton()        // Initialize create plan button
 
         // Initialize ListView and Adapter
         destinationAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, destinationList)
         val destinationListView = findViewById<ListView>(R.id.destination_listView)
         destinationListView.adapter = destinationAdapter
 
-        // Set up the Add button to add destinations to ListView
+        // Set up Add button for adding destinations to ListView
         val addButton = findViewById<Button>(R.id.add_button)
         addButton.setOnClickListener {
             if (!destinationPlace.isNullOrEmpty()) {
@@ -66,19 +63,20 @@ class CreatePlanActivity : AppCompatActivity() {
                 findViewById<EditText>(R.id.editTextDestLocation).text.clear() // Clear the EditText
             }
         }
+
     }
 
+    // Handle notification permission result
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == 1 && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            showNotification("New Plan Created", "Your travel plan has been saved successfully!")
+            showNotification(this)
         } else {
             Toast.makeText(this, "Notification permission denied", Toast.LENGTH_SHORT).show()
         }
     }
 
-
-    // Handle the result returned from MapsActivity
+    // Handle result returned from MapsActivity
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
@@ -86,47 +84,44 @@ class CreatePlanActivity : AppCompatActivity() {
             when (requestCode) {
                 MAPS_ACTIVITY_REQUEST_CODE_START -> {
                     startPlace = data?.getStringExtra("START_PLACE")
-                    if (startPlace != null) {
-                        useStartPlace()
-                    }
+                    useStartPlace()
                 }
                 MAPS_ACTIVITY_REQUEST_CODE_DEST -> {
                     destinationPlace = data?.getStringExtra("DESTINATION_PLACE")
-                    if (destinationPlace != null) {
-                        useDestinationPlace()
-                    }
+                    useDestinationPlace()
                 }
             }
         }
     }
 
+    // Open MapsActivity for selecting destination
     private fun setupDestinationButton() {
         val editTextButtonDestLocation = findViewById<EditText>(R.id.editTextDestLocation)
         editTextButtonDestLocation.setOnClickListener {
             val intent = Intent(this, MapsDestinationActivity::class.java)
-            startActivityForResult(intent, MAPS_ACTIVITY_REQUEST_CODE_DEST) // Launch MapsActivity for destination
+            startActivityForResult(intent, MAPS_ACTIVITY_REQUEST_CODE_DEST)
         }
     }
 
-    // Set up EditText button to open MapsActivity
+    // Open MapsActivity for selecting start place
     private fun setupStartButton() {
-        val editTextButtonStartDestination = findViewById<EditText>(R.id.editTextStartLocation)
-        editTextButtonStartDestination.setOnClickListener {
+        val editTextButtonStartLocation = findViewById<EditText>(R.id.editTextStartLocation)
+        editTextButtonStartLocation.setOnClickListener {
             val intent = Intent(this, MapsStartActivity::class.java)
-            startActivityForResult(intent, MAPS_ACTIVITY_REQUEST_CODE_START) // Launch MapsActivity
+            startActivityForResult(intent, MAPS_ACTIVITY_REQUEST_CODE_START)
         }
     }
 
-    // Set up the back button to navigate to HomepageActivity
+    // Setup back button to return to HomepageActivity
     private fun setupBackButton() {
         val backButton = findViewById<ImageButton>(R.id.backButton)
         backButton.setOnClickListener {
             val intent = Intent(this, HomepageActivity::class.java)
-            startActivity(intent) // Navigate to HomepageActivity
+            startActivity(intent)
         }
     }
 
-    // Set up the date picker dialog
+    // Setup date picker
     private fun setupDatePicker() {
         val dateEditText = findViewById<EditText>(R.id.editTextDate)
         val datePicker = MaterialDatePicker.Builder.datePicker()
@@ -134,15 +129,15 @@ class CreatePlanActivity : AppCompatActivity() {
             .build()
 
         dateEditText.setOnClickListener {
-            datePicker.show(supportFragmentManager, "MATERIAL_DATE_PICKER") // Show date picker
+            datePicker.show(supportFragmentManager, "MATERIAL_DATE_PICKER")
         }
 
         datePicker.addOnPositiveButtonClickListener { selection ->
-            dateEditText.setText(datePicker.headerText) // Set selected date to EditText
+            dateEditText.setText(datePicker.headerText)
         }
     }
 
-    // Set up the time picker dialog
+    // Setup time picker
     private fun setupTimePicker() {
         val timeEditText = findViewById<EditText>(R.id.editTextTime)
         val timePicker = MaterialTimePicker.Builder()
@@ -153,31 +148,33 @@ class CreatePlanActivity : AppCompatActivity() {
             .build()
 
         timeEditText.setOnClickListener {
-            timePicker.show(supportFragmentManager, "MATERIAL_TIME_PICKER") // Show time picker
+            timePicker.show(supportFragmentManager, "MATERIAL_TIME_PICKER")
         }
 
         timePicker.addOnPositiveButtonClickListener {
             val selectedHour = timePicker.hour
             val selectedMinute = timePicker.minute
-            timeEditText.setText(String.format("%02d:%02d", selectedHour, selectedMinute)) // Set selected time
+            timeEditText.setText(String.format("%02d:%02d", selectedHour, selectedMinute))
         }
     }
 
-    // Update the start location EditText with the selected start place
+    // Use the selected start place and set it in the EditText
     private fun useStartPlace() {
-        if (startPlace != null) {
+        if (!startPlace.isNullOrEmpty()) {
             val editTextStartLocation = findViewById<EditText>(R.id.editTextStartLocation)
-            editTextStartLocation.setText(startPlace) // Set start place in EditText
+            editTextStartLocation.setText(startPlace)
         }
     }
 
+    // Use the selected destination place and set it in the EditText
     private fun useDestinationPlace() {
-        if (destinationPlace != null) {
+        if (!destinationPlace.isNullOrEmpty()) {
             val editTextDestLocation = findViewById<EditText>(R.id.editTextDestLocation)
-            editTextDestLocation.setText(destinationPlace) // Set destination place in EditText
+            editTextDestLocation.setText(destinationPlace)
         }
     }
 
+    // Setup button to create a new plan
     private fun setupCreateButton() {
         val createButton = findViewById<Button>(R.id.create_button)
         val planNameEditText = findViewById<EditText>(R.id.editTextPlanName)
@@ -191,7 +188,7 @@ class CreatePlanActivity : AppCompatActivity() {
             val date = dateEditText.text.toString().trim()
             val time = timeEditText.text.toString().trim()
 
-            // ตรวจสอบว่า EditText ทั้งหมดต้องไม่ว่าง
+            // Validate that no fields are empty
             if (planName.isEmpty()) {
                 planNameEditText.error = "Please enter the plan name"
                 return@setOnClickListener
@@ -204,103 +201,96 @@ class CreatePlanActivity : AppCompatActivity() {
                 timeEditText.error = "Please select a time"
                 return@setOnClickListener
             }
-
-            // ตรวจสอบว่า startPlace ไม่เป็น null และไม่ว่าง
             if (startPlace.isNullOrEmpty()) {
-                start.error = "Please select a Location"
+                start.error = "Please select a location"
                 return@setOnClickListener
             }
-
-            // ตรวจสอบว่า destinationList ไม่ว่างหรือเปล่า
             if (destinationList.isNullOrEmpty()) {
                 destination.error = "Please add at least one destination"
                 return@setOnClickListener
             }
 
+            // Create new plan with unique ID
             val planId = "Plan_${System.currentTimeMillis()}"
+            val newPlan = Plan(planId, planName, startPlace!!, destinationList, date, time)
 
-            val newPlan = Plan(
-                id = planId,
-                planName = planName,
-                start = startPlace!!,  // startPlace ไม่เป็น null เพราะเราได้ตรวจสอบแล้ว
-                destination = destinationList,
-                date = date,
-                time = time
-            )
-
-            // บันทึก Plan ลงใน SharedPreferences
+            // Save plan to local storage
             savePlanToLocalStorage(newPlan)
 
             Toast.makeText(this, "New Plan Created: ${newPlan.planName}", Toast.LENGTH_SHORT).show()
 
+            // Handle notification permission for Android 13+ (Tiramisu)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
                     ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1)
                 } else {
-                    showNotification("New Plan Created", "Your travel plan has been saved successfully! ${planId}")
+                    showNotification(this)
                 }
             } else {
-                showNotification("New Plan Created", "Your travel plan has been saved successfully!")
+                showNotification(this)
             }
+
+            // Navigate to PlanDetailsActivity
+            val intent = Intent(this, PlanDetailsActivity::class.java)
+            intent.putExtra("PLAN_ID", planId)
+            startActivity(intent)
         }
     }
 
-
+    // Save plan to SharedPreferences
     private fun savePlanToLocalStorage(plan: Plan) {
-        val sharedPreferences = getSharedPreferences("myPlanStorage", Context.MODE_PRIVATE)
+        val sharedPreferences = getSharedPreferences("PlanStorage", Context.MODE_PRIVATE)
         val editor = sharedPreferences.edit()
         val gson = Gson()
 
-
-        // แปลง Plan เป็น JSON
+        // Convert plan to JSON
         val planJson = gson.toJson(plan)
 
-        // ดึงข้อมูลแผนทั้งหมดในรูปแบบ List<Plan> จาก SharedPreferences
+        // Retrieve and update plan list from SharedPreferences
         val planListJson = sharedPreferences.getString("planList", "[]")
         val type = object : TypeToken<MutableList<Plan>>() {}.type
         val planList: MutableList<Plan> = gson.fromJson(planListJson, type) ?: mutableListOf()
 
-        // เพิ่มแผนใหม่ลงในลิสต์
         planList.add(plan)
-
-        // บันทึกลิสต์แผนใหม่กลับไปใน SharedPreferences
         editor.putString("planList", gson.toJson(planList))
         editor.apply()
     }
 
-    private fun showNotification(title: String, text: String) {
-        val channelId = "plan_channel_id"
+    // Show notification when plan is created
+    private fun showNotification(context: Context) {
+        val channelId = "countdown_channel"
+        val channelName = "Countdown Notifications"
 
-        // ตรวจสอบและสร้าง Notification Channel สำหรับ Android 8.0 ขึ้นไป
+        // Create Notification Channel for API 26+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channelName = "Plan Notifications"
-            val channelDescription = "Notifications for new plans"
-            val importance = NotificationManager.IMPORTANCE_DEFAULT
-            val channel = NotificationChannel(channelId, channelName, importance).apply {
-                description = channelDescription
+            val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH).apply {
+                description = "Notification channel for countdown timer"
+                enableLights(true)
+                enableVibration(true)
             }
-            val notificationManager: NotificationManager =
-                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val notificationManager = context.getSystemService(NotificationManager::class.java)
             notificationManager.createNotificationChannel(channel)
         }
 
-        // สร้าง Notification
-        val notification = NotificationCompat.Builder(this, channelId)
-            .setContentTitle(title)
-            .setSmallIcon(R.drawable.ic_map)
-            .setContentText(text)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-            .build()
+        // Intent for Notification
+        val notificationIntent = Intent(context, CreatePlanActivity::class.java)
+        val pendingIntent = PendingIntent.getActivity(
+            context,
+            0,
+            notificationIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
 
-        // ตรวจสอบ permission ก่อนแสดง Notification
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
-            val manager = NotificationManagerCompat.from(this)
-            manager.notify(0, notification)
-        } else {
-            // ขอสิทธิ์ POST_NOTIFICATIONS หากยังไม่ได้รับ
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1)
-        }
+        val notificationBuilder = NotificationCompat.Builder(context, channelId)
+            .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .setContentTitle("Congratulation!")
+            .setContentText("Your travel plan has been saved successfully!")
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+
+        // Display notification
+        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.notify(0, notificationBuilder.build())
     }
-
-
 }
