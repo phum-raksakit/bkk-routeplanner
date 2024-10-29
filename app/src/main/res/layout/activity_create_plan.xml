@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".CreatePlanActivity">
+
+    <!-- Iitle Bar -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#75BDE0">
+
+            <ImageButton
+                android:id="@+id/backButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_back"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="30dp"
+                android:layout_marginBottom="15dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/backButton"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"/>
+
+            <TextView
+                android:id="@+id/textViewTitle"
+                style="@style/Text.Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:layout_marginBottom="10dp"
+                android:text="@string/CreatePlan"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <!-- Content Area -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/content"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_margin="20sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/appBarLayout">
+
+        <TextView
+            android:id="@+id/plan_name"
+            style="@style/Text.SubTitle"
+            android:textColor="@color/blue"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/PlanName"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <EditText
+            android:id="@+id/editTextPlanName"
+            style="@style/Text.Label"
+            android:textColor="@color/darkBlue"
+            android:textColorHint="@color/GreenConfirmAlpha0_7"
+            android:background="@drawable/selector_edit_text_big_bg"
+            android:singleLine="true"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="@string/YourPlanName"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/plan_name" />
+
+        <TextView
+            android:id="@+id/start_location"
+            style="@style/Text.SubTitle"
+            android:textColor="@color/blue"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/StartLocation"
+            android:layout_marginTop="5dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/editTextPlanName" />
+
+        <EditText
+            android:id="@+id/editTextStartLocation"
+            style="@style/Text.Label"
+            android:textColor="@color/darkBlue"
+            android:textColorHint="@color/GreenConfirmAlpha0_7"
+            android:background="@drawable/selector_edit_text_big_bg"
+            android:singleLine="true"
+            android:drawableStart="@drawable/ic_map"
+            android:drawablePadding="15dp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="@string/YourStartLocation"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/start_location" />
+
+        <TextView
+            android:id="@+id/tourist_location"
+            style="@style/Text.SubTitle"
+            android:textColor="@color/blue"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:text="@string/TouristLocations"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/editTextStartLocation" />
+
+        <EditText
+            android:id="@+id/editTextDestLocation"
+            style="@style/Text.Label"
+            android:textColor="@color/darkBlue"
+            android:textColorHint="@color/GreenConfirmAlpha0_7"
+            android:background="@drawable/selector_edit_text_big_bg"
+            android:singleLine="true"
+            android:drawableStart="@drawable/ic_search"
+            android:drawablePadding="15dp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="@string/Locations"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tourist_location"
+            />
+
+        <Button
+            android:id="@+id/add_button"
+            style="@style/Button3"
+            android:contentDescription="@string/addLocationButton"
+            android:background="@drawable/selector_button_bg"
+            android:textAllCaps="false"
+            android:gravity="center"
+            android:minWidth="0dp"
+            android:minHeight="0dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="@string/Add"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/editTextDestLocation"
+            app:backgroundTint="@color/darkBlue"/>
+
+        <TextView
+            android:id="@+id/destination_list"
+            style="@style/Text.SubTitle"
+            android:textColor="@color/blue"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:text="@string/DestinationList"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/add_button" />
+
+
+        <ListView
+            android:id="@+id/destination_listView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toTopOf="@+id/date"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/destination_list"
+            app:layout_constraintVertical_bias="0.0" />
+
+        <TextView
+            android:id="@+id/date"
+            style="@style/Text.SubTitle"
+            android:textColor="@color/blue"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/Date"
+            app:layout_constraintBottom_toTopOf="@+id/editTextDate"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <EditText
+            android:id="@+id/editTextDate"
+            style="@style/Text.Label"
+            android:textColorHint="@color/GreenConfirmAlpha0_7"
+            android:singleLine="true"
+            android:textColor="@color/darkBlue"
+            android:background="@drawable/selector_edit_text_big_bg"
+            android:drawableStart="@drawable/ic_calender"
+            android:drawablePadding="15dp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            app:layout_constraintBottom_toTopOf="@+id/time"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/time"
+            style="@style/Text.SubTitle"
+            android:textColor="@color/blue"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/Time"
+            app:layout_constraintBottom_toTopOf="@+id/editTextTime"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <EditText
+            android:id="@+id/editTextTime"
+            style="@style/Text.Label"
+            android:textColorHint="@color/GreenConfirmAlpha0_7"
+            android:singleLine="true"
+            android:textColor="@color/darkBlue"
+            android:background="@drawable/selector_edit_text_big_bg"
+            android:drawableStart="@drawable/ic_clock"
+            android:drawablePadding="15dp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            app:layout_constraintBottom_toTopOf="@+id/create_button"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <Button
+            android:id="@+id/create_button"
+            style="@style/Button2"
+            android:background="@drawable/selector_button_bg"
+            android:textAllCaps="false"
+            android:gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="10dp"
+            android:paddingLeft="40dp"
+            android:paddingRight="40dp"
+            android:paddingBottom="5dp"
+            android:layout_marginBottom="20dp"
+            android:text="@string/Create"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:backgroundTint="@color/darkBlue" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

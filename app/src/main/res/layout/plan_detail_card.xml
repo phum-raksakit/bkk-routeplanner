@@ -1,0 +1,57 @@
+<!-- res/layout/timeline_item.xml -->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+>
+
+    <!-- เส้นแนวตั้งทางด้านซ้าย -->
+    <LinearLayout
+        android:layout_width="40dp"
+        android:layout_height="match_parent"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="10dp"
+        android:orientation="vertical"
+        android:gravity="center">
+
+        <!-- จุดกลม -->
+        <View
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:background="@drawable/shape_circle"
+            android:layout_gravity="center"/>
+
+        <!-- เส้นแนวตั้ง -->
+        <View
+            android:id="@+id/line"
+            android:layout_width="3dp"
+            android:layout_height="match_parent"
+            android:layout_marginTop="4dp"
+            android:background="@color/darkBlue"/>
+    </LinearLayout>
+
+    <!-- ข้อมูลของแต่ละไอเทม เช่น CardView -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:paddingLeft="8dp">
+
+        <TextView
+            android:id="@+id/placeName"
+            style="@style/Text.SubTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="SEA LIFE Bangkok" />
+
+        <TextView
+            android:id="@+id/address"
+            style="@style/Text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Floor B1 Siam Paragon" />
+
+    </LinearLayout>
+</LinearLayout>

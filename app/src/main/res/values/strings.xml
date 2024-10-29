@@ -1,0 +1,42 @@
+<resources>
+    <!-- Title -->
+    <string name="app_name">BKK Route Planner</string>
+    <string name="ItineraryPlan">Itinerary Plan</string>
+    <string name="CreatePlan">Create Plan</string>
+
+    <!-- SubTitle -->
+    <string name="PlanName">Plan Name</string>
+    <string name="StartLocation">Starting Location</string>
+    <string name="TouristLocations">Tourist Locations</string>
+    <string name="Date">Date</string>
+    <string name="Time">Start Time</string>
+    <string name="ItineraryDetails">Itinerary Details</string>
+    <string name="ItineraryOrder">Itinerary Order</string>
+    <string name="DestinationList">Destination List</string>
+
+    <!-- Edit Text -->
+    <string name="YourPlanName">Your plan name</string>
+    <string name="YourStartLocation">Click Here To Select Start Place</string>
+    <string name="Locations">Click Here To Select Destination Place</string>
+    <string name="Dates">Click Here To Select Date</string>
+    <string name="Times">Click Here To Select Time</string>
+
+    <!-- Button -->
+    <string name="Create">Create</string>
+    <string name="Add">Add</string>
+
+    <!-- Button Description -->
+    <string name="addLocationButton">Add Location Button</string>
+    <string name="addNewPlanButton">Add new plan</string>
+    <string name="editPlanButton">Edit plan</string>
+    <string name="backButton">Back button</string>
+    <string name="CreateButton">Create Button</string>
+
+    <!-- Text -->
+    <string name="NoPlan">There are no plans yet.</string>
+    <string name="NoPlanExplain">You can press the plus button to\ncreate a plan</string>
+    <string name="title_activity_maps">MapsActivity</string>
+    <string name="title_activity_maps2">MapsActivity2</string>
+    <string name="title_activity_best_route">BestRouteActivity</string>
+
+</resources>

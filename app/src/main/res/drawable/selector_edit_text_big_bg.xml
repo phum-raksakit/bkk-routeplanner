@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- pressed -->
+    <item android:state_focused="true" android:drawable="@drawable/shape_edit_text_big_pressed" />
+
+    <!-- normal -->
+    <item android:drawable="@drawable/shape_edit_text_big_normal" />
+</selector>
