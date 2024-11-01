@@ -1,6 +1,5 @@
 package com.example.bkkrouteplanner
 
-import android.Manifest
 import android.content.Intent
 import android.os.Bundle
 import android.widget.*
@@ -11,16 +10,7 @@ import com.google.android.material.timepicker.TimeFormat
 import android.content.Context
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import androidx.core.app.NotificationCompat
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
-import android.content.pm.PackageManager
-import android.media.Image
-import android.os.Build
 import android.util.Log
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.Place
@@ -29,7 +19,9 @@ import com.google.android.libraries.places.api.net.PlacesClient
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import java.util.UUID
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 
 class CreatePlanActivity : AppCompatActivity() {
@@ -97,23 +89,24 @@ class CreatePlanActivity : AppCompatActivity() {
 
     private fun setupDatePicker() {
         val dateEditText = findViewById<EditText>(R.id.editTextDate)
-        val dateRangePicker = MaterialDatePicker.Builder.dateRangePicker().setTitleText("Select Date Range").build()
+        val datePicker = MaterialDatePicker.Builder.datePicker()
+            .setTitleText("Select Date")
+            .build()
 
         dateEditText.setOnClickListener {
-            dateRangePicker.show(supportFragmentManager, "MATERIAL_DATE_PICKER")
+            datePicker.show(supportFragmentManager, "MATERIAL_DATE_PICKER")
         }
 
-        dateRangePicker.addOnPositiveButtonClickListener { selection ->
-            val startDateFormatted = formatDate(selection.first)
-            val endDateFormatted = formatDate(selection.second)
-            dateEditText.setText("$startDateFormatted - $endDateFormatted")
+        datePicker.addOnPositiveButtonClickListener { selection ->
+            val selectedDateFormatted = formatDate(selection)
+            dateEditText.setText(selectedDateFormatted)
         }
     }
 
     private fun setupTimePicker() {
         val timeEditText = findViewById<EditText>(R.id.editTextTime)
         val timePicker = MaterialTimePicker.Builder()
-            .setTimeFormat(TimeFormat.CLOCK_24H)
+            .setTimeFormat(TimeFormat.CLOCK_12H)  // Set to 12-hour format
             .setHour(12)
             .setMinute(0)
             .setTitleText("Select Appointment time")
@@ -124,28 +117,66 @@ class CreatePlanActivity : AppCompatActivity() {
         }
 
         timePicker.addOnPositiveButtonClickListener {
-            val formattedTime = String.format("%02d:%02d", timePicker.hour, timePicker.minute)
+            // Format the selected time in 12-hour format with AM/PM
+            val hour = timePicker.hour
+            val minute = timePicker.minute
+            val amPm = if (hour >= 12) "PM" else "AM"
+            val formattedTime = String.format("%02d:%02d %s", if (hour % 12 == 0) 12 else hour % 12, minute, amPm)
             timeEditText.setText(formattedTime)
         }
     }
 
     private fun setupCreateButton(){
         val createButton = findViewById<Button>(R.id.create_button)
+        val id = System.currentTimeMillis().toString()
         createButton.setOnClickListener{
+
             val plan = Plan(
-                id = System.currentTimeMillis().toString(),
+                id = id,
                 planName = findViewById<EditText>(R.id.editTextPlanName).text.toString(),
                 start = startPlace,
                 latlng = currentLatLng,
                 destination = destList,
                 date = findViewById<EditText>(R.id.editTextDate).text.toString(),
-                time = findViewById<EditText>(R.id.editTextTime).text.toString()
+                time = findViewById<EditText>(R.id.editTextTime).text.toString(),
+                itinerary = null
             )
-            savePlanToLocalStorage(plan)
-            val resultIntent = Intent()
-            setResult(RESULT_OK, resultIntent)
-            finish()
+
+            CoroutineScope(Dispatchers.IO).launch {
+                val model = Model()
+                model.initializePlacesClient(this@CreatePlanActivity) // Initialize placesClient here
+                model.makePlan(plan)
+                val trip = model.getTrip()
+                Log.d("Trip","$trip")
+                savePlanToLocalStorage(trip)
+                val resultIntent = Intent(this@CreatePlanActivity, PlanDetailsActivity::class.java)
+                resultIntent.putExtra("PLAN_ID", id)
+                startActivity(resultIntent)
+                finish()
+            }
         }
+    }
+
+    private fun savePlanToLocalStorage(plan: Plan) {
+        val sharedPreferences = getSharedPreferences("PlanStorage", Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        val gson = Gson()
+        val newPlan = PlanForStorage(
+            id = plan.id,
+            planName = plan.planName,
+            start = plan.start,
+            latlng = plan.latlng,
+            date= plan.date,
+            time= plan.time,
+            itinerary = plan.itinerary?.map { Pair(it.first, it.second.toString()) }?.toMutableList() ?: mutableListOf()
+        )
+
+        val planListJson = sharedPreferences.getString("planList", "[]")
+        val planList: MutableList<PlanForStorage> = gson.fromJson(planListJson, object : TypeToken<MutableList<PlanForStorage>>() {}.type)
+        planList.add(newPlan)
+
+        editor.putString("planList", gson.toJson(planList))
+        editor.apply()
     }
 
     private fun setupBackButton(){
@@ -283,19 +314,6 @@ class CreatePlanActivity : AppCompatActivity() {
         return dateInMillis?.let {
             SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(it))
         } ?: ""
-    }
-
-    private fun savePlanToLocalStorage(plan: Plan) {
-        val sharedPreferences = getSharedPreferences("PlanStorage", Context.MODE_PRIVATE)
-        val editor = sharedPreferences.edit()
-        val gson = Gson()
-
-        val planListJson = sharedPreferences.getString("planList", "[]")
-        val planList: MutableList<Plan> = gson.fromJson(planListJson, object : TypeToken<MutableList<Plan>>() {}.type)
-        planList.add(plan)
-
-        editor.putString("planList", gson.toJson(planList))
-        editor.apply()
     }
 
 }

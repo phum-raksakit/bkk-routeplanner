@@ -84,6 +84,7 @@ class MapsStartActivity : AppCompatActivity(), OnMapReadyCallback {
                         val latLng = placeDetail.latLng
                         if (latLng != null) {
                             startPlaceID = placeDetail.id
+                            Log.d("ID","${startPlaceID}")
                             mMap.addMarker(MarkerOptions().position(latLng).title(placeDetail.name))
                             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
                         }
@@ -105,14 +106,15 @@ class MapsStartActivity : AppCompatActivity(), OnMapReadyCallback {
 
             if (!startPlaceID.isNullOrEmpty()) {
                 resultIntent.putExtra("START_PLACE_ID", startPlaceID)
+                setResult(RESULT_OK, resultIntent)
 
             } else {
                 currentLatLng?.let {
                     val latLngString = "${it.latitude},${it.longitude}"
                     resultIntent.putExtra("START_PLACE_LL", latLngString)
+                    setResult(RESULT_OK, resultIntent)
                 }
             }
-            setResult(RESULT_OK, resultIntent)
             finish()
         }
 

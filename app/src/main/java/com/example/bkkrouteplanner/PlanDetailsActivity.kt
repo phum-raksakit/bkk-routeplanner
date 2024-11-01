@@ -17,6 +17,10 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.PolylineOptions
+import com.google.android.libraries.places.api.Places
+import com.google.android.libraries.places.api.model.Place
+import com.google.android.libraries.places.api.net.FetchPlaceRequest
+import com.google.android.libraries.places.api.net.PlacesClient
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.google.maps.DirectionsApi
@@ -31,11 +35,17 @@ class PlanDetailsActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mMap: GoogleMap
     private var mapReady = false
     private var plan: Plan? = null
-    private var startPlace: PlaceData? = null
+    private var startPlace: place? = null
+    private lateinit var placesClient: PlacesClient
+    private var currentPlanForStorage: PlanForStorage? = null
+    private val latLngList = mutableListOf<LatLng>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_plan_details)
+
+        Places.initialize(applicationContext, BuildConfig.MAPS_API_KEY)
+        placesClient = Places.createClient(this)
 
         // Initialize the map
         val mapFragment = supportFragmentManager.findFragmentById(R.id.fragmentMap) as SupportMapFragment
@@ -44,12 +54,11 @@ class PlanDetailsActivity : AppCompatActivity(), OnMapReadyCallback {
         val planId = intent.getStringExtra("PLAN_ID")
 
         if (planId != null) {
-            displayPlanDetails(planId) // โหลดข้อมูลแผนตาม PLAN_ID ที่ได้รับมา
+            displayPlanDetails(planId)
         } else {
-            Log.d("SaveCheck", "Plan ID not provided.") // Log ถ้าไม่มี PLAN_ID
+            Log.d("SaveCheck", "Plan ID not provided.")
         }
 
-        // ปุ่มย้อนกลับเพื่อกลับไปที่หน้า HomepageActivity
         val backButton = findViewById<ImageButton>(R.id.backButton)
         backButton.setOnClickListener {
             val intent = Intent(this, HomepageActivity::class.java)
@@ -61,29 +70,36 @@ class PlanDetailsActivity : AppCompatActivity(), OnMapReadyCallback {
         val sharedPreferences = getSharedPreferences("PlanStorage", Context.MODE_PRIVATE)
         val gson = Gson()
         val json = sharedPreferences.getString("planList", "[]")
-        val type = object : TypeToken<List<Plan>>() {}.type
-        val planList: List<Plan> = gson.fromJson(json, type) ?: emptyList()
+        val type = object : TypeToken<List<PlanForStorage>>() {}.type
+        val planList: List<PlanForStorage> = gson.fromJson(json, type) ?: emptyList()
 
-        plan = planList.find { it.id == planId }
-
+        val plan = planList.find { it.id == planId }
+        currentPlanForStorage = plan
         plan?.let { currentPlan ->
-            loadPlaces(currentPlan)
+            // Load and display basic information
             findViewById<TextView>(R.id.textViewPlanName).text = currentPlan.planName
             findViewById<TextView>(R.id.textViewMap).text = currentPlan.start?.name
             findViewById<TextView>(R.id.textViewDate).text = currentPlan.date
             findViewById<TextView>(R.id.textViewTime).text = currentPlan.time
 
-            // แสดงสถานที่ใน RecyclerView
+            Log.d("Check Log", "$currentPlan")
+
+            // Display itinerary in RecyclerView
             val recyclerView: RecyclerView = findViewById(R.id.recyclerViewPlace)
             recyclerView.layoutManager = LinearLayoutManager(this)
 
-            val items = currentPlan.destination.map { TimelineItem(it.name, "") }
+            // Create list of timeline items from itinerary
+            val items = currentPlan.itinerary.map {
+                val placeName = it.first.name
+                val time = it.second
+                TimelineItem(placeName, time)
+            }
+
             val adapter = TimelinePlanAdapter(items)
             recyclerView.adapter = adapter
 
-
         } ?: run {
-            Log.d("SaveCheck", "Plan with ID $planId not found.") // Log ถ้าไม่พบแผนการเดินทางที่มี PLAN_ID นี้
+            Log.d("SaveCheck", "Plan with ID $planId not found.")
         }
     }
 
@@ -92,34 +108,62 @@ class PlanDetailsActivity : AppCompatActivity(), OnMapReadyCallback {
         mMap = googleMap
         mapReady = true
 
+        currentPlanForStorage?.let { markMapWithPlacesById(it) }
     }
 
-    private fun loadPlaces(plan: Plan) {
-        val sharedPreferences = getSharedPreferences("PlaceStorage", Context.MODE_PRIVATE)
-        val gson = Gson()
-        val json = sharedPreferences.getString("placeList", "[]") // Load the list of places from SharedPreferences
-        val type = object : TypeToken<List<PlaceData>>() {}.type
-        val placeList: List<PlaceData> = gson.fromJson(json, type) ?: emptyList()
+    private fun fetchPlaceById(placeId: String, onResult: (LatLng?) -> Unit) {
+        val placeFields = listOf(Place.Field.LAT_LNG, Place.Field.NAME)
+        val request = FetchPlaceRequest.newInstance(placeId, placeFields)
 
-        // Find startPlace using the start ID from the plan
-        startPlace = placeList.find { it.id == plan.start?.id }
+        placesClient.fetchPlace(request)
+            .addOnSuccessListener { response ->
+                val place = response.place
+                Log.d("PlaceInfo", "Place found: ${place.name}, Location: ${place.latLng}")
+                onResult(place.latLng)
+            }
+            .addOnFailureListener { exception ->
+                Log.e("PlaceInfo", "Place not found: ${exception.message}")
+                onResult(null)
+            }
+    }
 
-        startPlace?.let { place ->
-            Log.d("StartPlace", "Loaded start place: ${place.name}")
-        } ?: run {
-            Log.e("StartPlace", "Start place with ID ${plan.start} not found.")
+    private fun markMapWithPlacesById(plan: PlanForStorage) {
+        val boundsBuilder = LatLngBounds.Builder()
+        latLngList.clear()  // Clear previous entries
+
+        val onLatLngFetched: (LatLng?) -> Unit = { latLng ->
+            latLng?.let {
+                latLngList.add(it)
+                boundsBuilder.include(it)
+            }
+            // Check if all points have been processed
+            if (latLngList.size == 1 + plan.itinerary.size) {  // 1 for start place + itinerary size
+                if (latLngList.isNotEmpty()) {
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(boundsBuilder.build(), 100))
+                } else {
+                    Log.e("MapError", "No valid locations to display on map")
+                }
+            }
         }
 
-        // Load destinations directly from the plan's destination list
-        val destinations = plan.destination // This is already a list of PlaceInfo
-
-        if (destinations.isNotEmpty()) {
-            Log.d("Destinations", "Loaded ${destinations.size} destinations.")
-            destinations.forEach { place ->
-                Log.d("Destination", "Loaded destination: ${place.name}")
+        // Fetch start place
+        plan.start?.let { startPlace ->
+            fetchPlaceById(startPlace.id) { latLng ->
+                latLng?.let {
+                    mMap.addMarker(MarkerOptions().position(it).title("Start: ${startPlace.name}"))
+                    onLatLngFetched(it)
+                }
             }
-        } else {
-            Log.e("Destinations", "No destinations found for the provided plan.")
+        }
+
+        // Fetch each destination in itinerary
+        plan.itinerary.forEach { (place, time) ->
+            fetchPlaceById(place.id) { latLng ->
+                latLng?.let {
+                    mMap.addMarker(MarkerOptions().position(it).title("${place.name} at $time"))
+                    onLatLngFetched(it)
+                }
+            }
         }
     }
 }

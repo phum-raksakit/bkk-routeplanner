@@ -31,6 +31,7 @@
     <string name="editPlanButton">Edit plan</string>
     <string name="backButton">Back button</string>
     <string name="CreateButton">Create Button</string>
+    <string name="DeletePlan">Delete Plan Button</string>
 
     <!-- Text -->
     <string name="NoPlan">There are no plans yet.</string>

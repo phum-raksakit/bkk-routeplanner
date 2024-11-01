@@ -12,8 +12,8 @@ class TimelinePlanAdapter(private val items: List<TimelineItem>) : RecyclerView.
     // ViewHolder class for holding and binding views
     inner class TimelineViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val placeName: TextView = view.findViewById(R.id.placeName) // TextView for place name
-        val address: TextView = view.findViewById(R.id.address)     // TextView for place address
-        val line: View = view.findViewById(R.id.line)               // View representing the timeline line
+        val line: View = view.findViewById(R.id.line)
+        val time: TextView = view.findViewById(R.id.time)// View representing the timeline line
     }
 
     // Create and return a new ViewHolder for the item view
@@ -25,8 +25,8 @@ class TimelinePlanAdapter(private val items: List<TimelineItem>) : RecyclerView.
     // Bind data to the views in the ViewHolder
     override fun onBindViewHolder(holder: TimelineViewHolder, position: Int) {
         val item = items[position]
-        holder.placeName.text = item.placeName   // Set place name
-        holder.address.text = item.address       // Set place address
+        holder.placeName.text = item.placeName
+        holder.time.text = item.time
 
         // Hide the timeline line for the last item in the list
         if (position == items.size - 1) {

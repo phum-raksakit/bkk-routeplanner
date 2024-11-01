@@ -43,11 +43,14 @@ class HomepageActivity : AppCompatActivity() {
 
         val items = loadPlansFromSharedPreferences()
         Log.d("Check Plan", "${items}")
-        val adapter = PlanAdaptor(items) { planItem ->
+        val adapter = PlanAdaptor(items, onItemClick = { planItem ->
             val intent = Intent(this, PlanDetailsActivity::class.java)
             intent.putExtra("PLAN_ID", planItem.planId)
             startActivity(intent)
-        }
+        }, onDeleteClick = { planItem ->
+            deletePlanFromSharedPreferences(planItem.planId)
+            recreate()
+        })
         recyclerView.adapter = adapter
 
         if (adapter.itemCount == 0) {
@@ -88,33 +91,39 @@ class HomepageActivity : AppCompatActivity() {
 
         Log.d("LoadCheck", "JSON loaded: $json")
 
-        val type = object : TypeToken<List<Plan>>() {}.type
-        val planList: List<Plan> = gson.fromJson(json, type) ?: emptyList()
+        val type = object : TypeToken<List<PlanForStorage>>() {}.type
+        val planForStorageList: List<PlanForStorage> = gson.fromJson(json, type) ?: emptyList()
 
-        Log.d("LoadCheck", "Plan list: $planList")
+        Log.d("LoadCheck", "PlanForStorage list: $planForStorageList")
 
-        return planList.map { plan ->
-            // ตรวจสอบสถานที่ปลายทางแรกและที่สองใน destination
-            val place1 = plan.destination.getOrNull(0)?.name ?: "Unknown Place 1"
-            val place2 = plan.destination.getOrNull(1)?.name ?: "Unknown Place 2"
+        return planForStorageList.map { storedPlan ->
+            val place1 = storedPlan.itinerary.getOrNull(0)?.first?.name ?: "Unknown Place 1"
+            val place2 = storedPlan.itinerary.getOrNull(1)?.first?.name ?: "Unknown Place 2"
 
             PlanItem(
-                planId = plan.id,
-                planName = plan.planName,
-                dateOfPlan = plan.date,
-                numOfPlaces = "${plan.destination.size} Places",
+                planId = storedPlan.id,
+                planName = storedPlan.planName,
+                dateOfPlan = storedPlan.date,
+                numOfPlaces = "${storedPlan.itinerary.size} Places",
                 place1 = place1,
                 place2 = place2
             )
         }
     }
 
-    private fun clearAllSharedPreferences() {
+    private fun deletePlanFromSharedPreferences(planId: String) {
         val sharedPreferences = getSharedPreferences("PlanStorage", Context.MODE_PRIVATE)
         val editor = sharedPreferences.edit()
-        editor.clear()
+        val gson = Gson()
+        val json = sharedPreferences.getString("planList", "[]")
+
+        val type = object : TypeToken<MutableList<Plan>>() {}.type
+        val planList: MutableList<Plan> = gson.fromJson(json, type) ?: mutableListOf()
+
+        planList.removeAll { it.id == planId }
+
+        editor.putString("planList", gson.toJson(planList))
         editor.apply()
-        Toast.makeText(this, "All shared preferences cleared", Toast.LENGTH_SHORT).show()
     }
 
     private fun loadFileFromSharedPreferences() {
